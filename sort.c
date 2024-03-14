@@ -31,13 +31,8 @@ size_t Size(void* ptr)
 // extraMemoryAllocated counts bytes of extra memory allocated
 void mergeSort(int pData[], int l, int r)
 {
-	//This code was made with the assumption that l is always 0... given, it SHOULD work if l is a non-zero value.
 	//For reference, this code expects l to be the starting index, r to be the final index, 
 	//and mid to be the final index of the first half.
-
-	//I've been able to figure out that mergeSort IS working... 
-	//I think, but even the fixed version of the printing algorithm is wrong. If only I could read the array in the debugger.
-	//Or maybe the printing algorithm is completely fine and I'm going crazy?
 
 	//Don't do anything if you were given an array of size 1.
 	if (l == r) {
@@ -46,6 +41,12 @@ void mergeSort(int pData[], int l, int r)
 
 	//First, split the array in half.
 	int mid = (l + r)/2;
+
+	//Then, call mergeSort on each half.
+	mergeSort(pData, l, mid);
+	mergeSort(pData, mid + 1, r);
+	
+	//Finally, stitch the two halves together.
 	int* lowHalf = Alloc(sizeof(int) * (mid + 1 - l));
 	int* highHalf = Alloc(sizeof(int) * (r - mid));
 
@@ -56,17 +57,12 @@ void mergeSort(int pData[], int l, int r)
 	for (int c = 0; c < r - mid; c++) {
 		highHalf[c] = pData[mid + 1 + c];
 	}
-
-	//Then, call mergeSort on each half.
-	mergeSort(lowHalf, 0, mid - l);
-	mergeSort(highHalf, 0, r - mid - 1);
-
-	//Finally, stitch the two halves together.
+	
 	int currentPDataIndex = l;
 	int lowHalfIndex = 0;
 	int highHalfIndex = 0;
 
-	while (lowHalfIndex < (mid + 1) && highHalfIndex < (r - mid)) {
+	while (lowHalfIndex < (mid + 1 - l) && highHalfIndex < (r - mid)) {
 		if (lowHalf[lowHalfIndex] <= highHalf[highHalfIndex]) {
 			pData[currentPDataIndex] = lowHalf[lowHalfIndex];
 			lowHalfIndex++;
@@ -78,7 +74,7 @@ void mergeSort(int pData[], int l, int r)
 	}
 
 	//One of the arrays is empty. We don't know which one. Since whiles are used anyway, an if statement is useless here.
-	while (lowHalfIndex < (mid + 1)) {
+	while (lowHalfIndex < (mid + 1 - l)) {
 		pData[currentPDataIndex] = lowHalf[lowHalfIndex];
 		lowHalfIndex++;
 		currentPDataIndex++;
