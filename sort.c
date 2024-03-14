@@ -31,6 +31,68 @@ size_t Size(void* ptr)
 // extraMemoryAllocated counts bytes of extra memory allocated
 void mergeSort(int pData[], int l, int r)
 {
+	//This code was made with the assumption that l is always 0... given, it SHOULD work if l is a non-zero value.
+	//For reference, this code expects l to be the starting index, r to be the final index, 
+	//and mid to be the final index of the first half.
+
+	//I've been able to figure out that mergeSort IS working... 
+	//I think, but even the fixed version of the printing algorithm is wrong. If only I could read the array in the debugger.
+	//Or maybe the printing algorithm is completely fine and I'm going crazy?
+
+	//Don't do anything if you were given an array of size 1.
+	if (l == r) {
+		return;
+	}
+
+	//First, split the array in half.
+	int mid = (l + r)/2;
+	int* lowHalf = Alloc(sizeof(int) * (mid + 1 - l));
+	int* highHalf = Alloc(sizeof(int) * (r - mid));
+
+	for (int c = 0; c < mid + 1 - l; c++) {
+		lowHalf[c] = pData[l + c];
+	}
+
+	for (int c = 0; c < r - mid; c++) {
+		highHalf[c] = pData[mid + 1 + c];
+	}
+
+	//Then, call mergeSort on each half.
+	mergeSort(lowHalf, 0, mid - l);
+	mergeSort(highHalf, 0, r - mid - 1);
+
+	//Finally, stitch the two halves together.
+	int currentPDataIndex = l;
+	int lowHalfIndex = 0;
+	int highHalfIndex = 0;
+
+	while (lowHalfIndex < (mid + 1) && highHalfIndex < (r - mid)) {
+		if (lowHalf[lowHalfIndex] <= highHalf[highHalfIndex]) {
+			pData[currentPDataIndex] = lowHalf[lowHalfIndex];
+			lowHalfIndex++;
+		} else {
+			pData[currentPDataIndex] = highHalf[highHalfIndex];
+			highHalfIndex++;
+		}
+		currentPDataIndex++;
+	}
+
+	//One of the arrays is empty. We don't know which one. Since whiles are used anyway, an if statement is useless here.
+	while (lowHalfIndex < (mid + 1)) {
+		pData[currentPDataIndex] = lowHalf[lowHalfIndex];
+		lowHalfIndex++;
+		currentPDataIndex++;
+	}
+
+	while (highHalfIndex < (r - mid)) {
+		pData[currentPDataIndex] = highHalf[highHalfIndex];
+		highHalfIndex++;
+		currentPDataIndex++;
+	}
+
+	//Deallocate the intermediary arrays.
+	DeAlloc(lowHalf);
+	DeAlloc(highHalf);
 }
 
 // parses input file to an integer array
@@ -67,19 +129,20 @@ int parseData(char *inputFileName, int **ppData)
 // prints first and last 100 items in the data array
 void printArray(int pData[], int dataSz)
 {
-	int i, sz = dataSz - 100;
-	printf("\tData:\n\t");
-	for (i=0;i<100;++i)
-	{
-		printf("%d ",pData[i]);
-	}
-	printf("\n\t");
-	
-	for (i=sz;i<dataSz;++i)
-	{
-		printf("%d ",pData[i]);
-	}
-	printf("\n\n");
+    int i, sz = (dataSz > 100 ? dataSz - 100 : 0);
+    int firstHundred = (dataSz < 100 ? dataSz : 100);
+    printf("\tData:\n\t");
+    for (i=0;i<firstHundred;++i)
+    {
+        printf("%d ",pData[i]);
+    }
+    printf("\n\t");
+    
+    for (i=sz;i<dataSz;++i)
+    {
+        printf("%d ",pData[i]);
+    }
+    printf("\n\n");
 }
 
 int main(void)
